@@ -136,9 +136,12 @@ typedef abi_int         target_pid_t;
 #define STACK_ALIGNMENT 16
 #endif
 
-#ifdef TARGET_ABI32
+#ifdef TARGET_ABI32 || defined(TARGET_RISCV64ILP32)
 #undef ELF_CLASS
 #define ELF_CLASS ELFCLASS32
+#endif
+
+#ifdef TARGET_ABI32
 #undef bswaptls
 #define bswaptls(ptr) bswap32s(ptr)
 #endif
@@ -285,6 +288,9 @@ static bool elf_check_ident(struct elfhdr *ehdr)
             && ehdr->e_ident[EI_MAG1] == ELFMAG1
             && ehdr->e_ident[EI_MAG2] == ELFMAG2
             && ehdr->e_ident[EI_MAG3] == ELFMAG3
+            #ifdef TARGET_RISCV64ILP32
+            && ABI_X32_P(ehdr->e_flags)
+            #endif
             && ehdr->e_ident[EI_CLASS] == ELF_CLASS
             && ehdr->e_ident[EI_DATA] == ELF_DATA
             && ehdr->e_ident[EI_VERSION] == EV_CURRENT);

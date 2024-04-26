@@ -7,3 +7,6 @@ config RISCV64
     bool
     select ARM_COMPATIBLE_SEMIHOSTING if TCG
     select DEVICE_TREE # needed by boot.c
+
+config RISCV64ILP32
+    bool

@@ -2965,7 +2965,7 @@ static const TypeInfo riscv_cpu_type_infos[] = {
 #if defined(TARGET_RISCV32)
         .misa_mxl_max = MXL_RV32,
         .cfg.max_satp_mode = VM_1_10_SV32,
-#elif defined(TARGET_RISCV64)
+#elif defined(TARGET_RISCV64) || defined(TARGET_RISCV64ILP32)
         .misa_mxl_max = MXL_RV64,
         .cfg.max_satp_mode = VM_1_10_SV57,
 #endif
