@@ -138,13 +138,13 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
 {
     RISCVCPU *cpu = env_archcpu(env);
     RISCVExtStatus fs, vs;
-    uint32_t flags = 0;
+    CPURISCVTBFlags flags = {0, 0};
     bool pm_signext = riscv_cpu_virt_mem_enabled(env);
 
     *pc = env->xl == MXL_RV32 ? env->pc & UINT32_MAX : env->pc;
     *cs_base = 0;
 
-    if (cpu->cfg.ext_zve32x) {
+    if (cpu->cfg.ext_zve32x || cpu->cfg.ext_xtheadvector) {
         /*
          * If env->vl equals to VLMAX, we can use generic vector operation
          * expanders (GVEC) to accerlate the vector operations.
@@ -161,19 +161,19 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
         uint32_t maxsz = vlmax << vsew;
         bool vl_eq_vlmax = (env->vstart == 0) && (vlmax == env->vl) &&
                            (maxsz >= 8);
-        flags = FIELD_DP32(flags, TB_FLAGS, VILL, env->vill);
-        flags = FIELD_DP32(flags, TB_FLAGS, SEW, vsew);
-        flags = FIELD_DP32(flags, TB_FLAGS, LMUL,
-                           FIELD_EX64(env->vtype, VTYPE, VLMUL));
-        flags = FIELD_DP32(flags, TB_FLAGS, VL_EQ_VLMAX, vl_eq_vlmax);
-        flags = FIELD_DP32(flags, TB_FLAGS, VTA,
-                           FIELD_EX64(env->vtype, VTYPE, VTA));
-        flags = FIELD_DP32(flags, TB_FLAGS, VMA,
-                           FIELD_EX64(env->vtype, VTYPE, VMA));
-        flags = FIELD_DP32(flags, TB_FLAGS, VSTART_EQ_ZERO, env->vstart == 0);
+        DP_TBFLAGS_ANY(flags, VILL, env->vill);
+        DP_TBFLAGS_ANY(flags, SEW, vsew);
+        DP_TBFLAGS_ANY(flags, LMUL, FIELD_EX64(env->vtype, VTYPE, VLMUL));
+        DP_TBFLAGS_ANY(flags, VL_EQ_VLMAX, vl_eq_vlmax);
+        DP_TBFLAGS_ANY(flags, VTA, FIELD_EX64(env->vtype, VTYPE, VTA));
+        DP_TBFLAGS_ANY(flags, VMA, FIELD_EX64(env->vtype, VTYPE, VMA));
+        DP_TBFLAGS_ANY(flags, VSTART_EQ_ZERO, env->vstart == 0);
+
     } else {
-        flags = FIELD_DP32(flags, TB_FLAGS, VILL, 1);
+        DP_TBFLAGS_ANY(flags, VILL, 1);
     }
+
+    DP_TBFLAGS_THEAD(flags, BF16, env->bf16);
 
     if (cpu_get_fcfien(env)) {
         /*
@@ -181,26 +181,27 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
          * the start of the block is tracked via env->elp. env->elp
          * is turned on during jalr translation.
          */
-        flags = FIELD_DP32(flags, TB_FLAGS, FCFI_LP_EXPECTED, env->elp);
-        flags = FIELD_DP32(flags, TB_FLAGS, FCFI_ENABLED, 1);
+        DP_TBFLAGS_ANY(flags, FCFI_LP_EXPECTED, env->elp);
+        DP_TBFLAGS_ANY(flags, FCFI_ENABLED, 1);
     }
 
     if (cpu_get_bcfien(env)) {
-        flags = FIELD_DP32(flags, TB_FLAGS, BCFI_ENABLED, 1);
+        DP_TBFLAGS_ANY(flags, BCFI_ENABLED, 1);
     }
 
 #ifdef CONFIG_USER_ONLY
     fs = EXT_STATUS_DIRTY;
     vs = EXT_STATUS_DIRTY;
+    DP_TBFLAGS_THEAD(flags, MS, EXT_STATUS_DIRTY);
 #else
-    flags = FIELD_DP32(flags, TB_FLAGS, PRIV, env->priv);
+    DP_TBFLAGS_ANY(flags, PRIV, env->priv);
 
-    flags |= riscv_env_mmu_index(env, 0);
+    flags.flags |= riscv_env_mmu_index(env, 0);
     fs = get_field(env->mstatus, MSTATUS_FS);
     vs = get_field(env->mstatus, MSTATUS_VS);
 
     if (env->virt_enabled) {
-        flags = FIELD_DP32(flags, TB_FLAGS, VIRT_ENABLED, 1);
+        DP_TBFLAGS_ANY(flags, VIRT_ENABLED, 1);
         /*
          * Merge DISABLED and !DIRTY states using MIN.
          * We will set both fields when dirtying.
@@ -216,18 +217,19 @@ void cpu_get_tb_cpu_state(CPURISCVState *env, vaddr *pc,
     }
 
     if (cpu->cfg.debug && !icount_enabled()) {
-        flags = FIELD_DP32(flags, TB_FLAGS, ITRIGGER, env->itrigger_enabled);
+        DP_TBFLAGS_ANY(flags, ITRIGGER, env->itrigger_enabled);
     }
 #endif
 
-    flags = FIELD_DP32(flags, TB_FLAGS, FS, fs);
-    flags = FIELD_DP32(flags, TB_FLAGS, VS, vs);
-    flags = FIELD_DP32(flags, TB_FLAGS, XL, env->xl);
-    flags = FIELD_DP32(flags, TB_FLAGS, AXL, cpu_address_xl(env));
-    flags = FIELD_DP32(flags, TB_FLAGS, PM_PMM, riscv_pm_get_pmm(env));
-    flags = FIELD_DP32(flags, TB_FLAGS, PM_SIGNEXTEND, pm_signext);
+    DP_TBFLAGS_ANY(flags, FS, fs);
+    DP_TBFLAGS_ANY(flags, VS, vs);
+    DP_TBFLAGS_ANY(flags, XL, env->xl);
+    DP_TBFLAGS_ANY(flags, AXL, cpu_address_xl(env));
+    DP_TBFLAGS_ANY(flags, PM_PMM, riscv_pm_get_pmm(env));
+    DP_TBFLAGS_ANY(flags, PM_SIGNEXTEND, pm_signext);
 
-    *pflags = flags;
+    *pflags = flags.flags;
+    *cs_base = flags.flags2;
 }
 
 RISCVPmPmm riscv_pm_get_pmm(CPURISCVState *env)

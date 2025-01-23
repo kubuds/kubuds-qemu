@@ -9,6 +9,13 @@
                  (((uint64_t)(val) * ((mask) & ~((mask) << 1))) & \
                  (uint64_t)(mask)))
 
+#define CSR_TH_SXSTATUS 0x5c0
+
+/* TH_SXSTATUS bits */
+#define TH_SXSTATUS_UCME        BIT(16)
+#define TH_SXSTATUS_MAEE        BIT(21)
+#define TH_SXSTATUS_THEADISAEE  BIT(22)
+
 /* Extension context status mask */
 #define EXT_STATUS_MASK     0x3ULL
 
@@ -959,4 +966,31 @@ typedef enum RISCVException {
 #define MCONTEXT64                         0x0000000000001FFFULL
 #define MCONTEXT32_HCONTEXT                0x0000007F
 #define MCONTEXT64_HCONTEXT                0x0000000000003FFFULL
+
+/* Xuantie custom CSRs */
+#define TH_MSTATUS_VS     0x01800000
+
+#define TH_FSR_VXRM_SHIFT      9
+#define TH_FSR_VXRM            (0x3 << TH_FSR_VXRM_SHIFT)
+
+#define TH_FSR_VXSAT_SHIFT     8
+#define TH_FSR_VXSAT           (0x1 << TH_FSR_VXSAT_SHIFT)
+
+#define TH_VTYPE_LMUL_SHIFT    0
+#define TH_VTYPE_LMUL          (0x3 << TH_VTYPE_LMUL_SHIFT)
+
+#define TH_VTYPE_SEW_SHIFT     2
+#define TH_VTYPE_SEW           (0x7 << TH_VTYPE_SEW_SHIFT)
+
+#define TH_VTYPE_CLEAR_SHIFT   5
+#define TH_VTYPE_CLEAR         (0x7 << TH_VTYPE_CLEAR_SHIFT)
+
+#define CSR_FXCR            0x800
+
+/* Floating point round mode in fxcr */
+#define FXCR_RD_SHIFT       24
+#define FXCR_RD             (0x7 << FXCR_RD_SHIFT)
+/* BF16 in fxcr */
+#define FXCR_BF16_SHIFT     31
+#define FXCR_BF16           (0x1 << FXCR_BF16_SHIFT)
 #endif

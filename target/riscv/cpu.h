@@ -179,6 +179,12 @@ FIELD(VTYPE, VMA, 7, 1)
 FIELD(VTYPE, VEDIV, 8, 2)
 FIELD(VTYPE, RESERVED, 10, sizeof(target_ulong) * 8 - 11)
 
+/* See the commentary above the TBFLAG field definitions.  */
+typedef struct CPURISCVTBFlags {
+    uint32_t flags;
+    target_ulong flags2;
+} CPURISCVTBFlags;
+
 typedef struct PMUCTRState {
     /* Current value of a counter */
     target_ulong mhpmcounter_val;
@@ -473,6 +479,8 @@ struct CPUArchState {
     hwaddr kernel_addr;
     hwaddr fdt_addr;
 
+    bool bf16;
+
 #ifdef CONFIG_KVM
     /* kvm timer */
     bool kvm_timer_dirty;
@@ -629,6 +637,7 @@ FIELD(TB_FLAGS, SEW, 10, 3)
 FIELD(TB_FLAGS, VL_EQ_VLMAX, 13, 1)
 FIELD(TB_FLAGS, VILL, 14, 1)
 FIELD(TB_FLAGS, VSTART_EQ_ZERO, 15, 1)
+
 /* The combination of MXL/SXL/UXL that applies to the current cpu mode. */
 FIELD(TB_FLAGS, XL, 16, 2)
 /* If PointerMasking should be applied */
@@ -650,6 +659,20 @@ FIELD(TB_FLAGS, BCFI_ENABLED, 28, 1)
 /* If pointer masking should be applied and address sign extended */
 FIELD(TB_FLAGS, PM_PMM, 29, 2)
 FIELD(TB_FLAGS, PM_SIGNEXTEND, 31, 1)
+
+FIELD(TB_FLAGS_THEAD, MS, 8, 2)
+FIELD(TB_FLAGS_THEAD, BF16, 20, 1)
+
+/*
+ * Helpers for using the above.
+ */
+#define DP_TBFLAGS_ANY(DST, WHICH, VAL) \
+    (DST.flags = FIELD_DP32(DST.flags, TB_FLAGS, WHICH, VAL))
+#define DP_TBFLAGS_THEAD(DST, WHICH, VAL) \
+    (DST.flags2 = FIELD_DP32(DST.flags2, TB_FLAGS_THEAD, WHICH, VAL))
+
+#define EX_TBFLAGS_ANY(IN, WHICH)   FIELD_EX32(IN.flags, TB_FLAGS, WHICH)
+#define EX_TBFLAGS_THEAD(IN, WHICH) FIELD_EX32(IN.flags2, TB_FLAGS_THEAD, WHICH)
 
 #ifdef TARGET_RISCV32
 #define riscv_cpu_mxl(env)  ((void)(env), MXL_RV32)
@@ -897,6 +920,45 @@ char *riscv_cpu_get_name(RISCVCPU *cpu);
 void riscv_cpu_finalize_features(RISCVCPU *cpu, Error **errp);
 void riscv_add_satp_mode_properties(Object *obj);
 bool riscv_cpu_accelerator_compatible(RISCVCPU *cpu);
+
+/* CSR function table */
+RISCVException fs(CPURISCVState *env, int csrno);
+RISCVException vs(CPURISCVState *env, int csrno);
+RISCVException any(CPURISCVState *env, int csrno);
+RISCVException smode(CPURISCVState *env, int csrno);
+RISCVException clic(CPURISCVState *env, int csrno);
+RISCVException read_fcsr(CPURISCVState *env, int csrno,
+                         target_ulong *val);
+RISCVException write_fcsr(CPURISCVState *env, int csrno,
+                          target_ulong val);
+RISCVException read_vtype(CPURISCVState *env, int csrno,
+                          target_ulong *val);
+RISCVException read_vl(CPURISCVState *env, int csrno,
+                       target_ulong *val);
+RISCVException read_vlenb(CPURISCVState *env, int csrno,
+                          target_ulong *val);
+RISCVException read_vxrm(CPURISCVState *env, int csrno,
+                         target_ulong *val);
+RISCVException write_vxrm(CPURISCVState *env, int csrno,
+                          target_ulong val);
+RISCVException read_vxsat(CPURISCVState *env, int csrno,
+                          target_ulong *val);
+RISCVException write_vxsat(CPURISCVState *env, int csrno,
+                           target_ulong val);
+RISCVException read_vstart(CPURISCVState *env, int csrno,
+                           target_ulong *val);
+RISCVException write_vstart(CPURISCVState *env, int csrno,
+                            target_ulong val);
+RISCVException read_mstatus(CPURISCVState *env, int csrno,
+                            target_ulong *val);
+RISCVException write_mstatus(CPURISCVState *env, int csrno,
+                             target_ulong val);
+RISCVException write_sstatus(CPURISCVState *env, int csrno,
+                             target_ulong val);
+RISCVException read_sstatus(CPURISCVState *env, int csrno,
+                            target_ulong *val);
+RISCVException read_vcsr(CPURISCVState *env, int csrno, target_ulong *val);
+RISCVException write_vcsr(CPURISCVState *env, int csrno, target_ulong val);
 
 /* CSR function table */
 extern riscv_csr_operations csr_ops[CSR_TABLE_SIZE];

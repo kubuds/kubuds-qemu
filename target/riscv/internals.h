@@ -71,7 +71,19 @@ FIELD(VDATA, VMA, 6, 1)
 FIELD(VDATA, NF, 7, 4)
 FIELD(VDATA, WD, 7, 1)
 
+FIELD(VDATA_TH, MLEN, 0, 8)
+FIELD(VDATA_TH, VM, 8, 1)
+FIELD(VDATA_TH, LMUL, 9, 2)
+FIELD(VDATA_TH, NF, 11, 4)
+FIELD(VDATA_TH, WD, 11, 1)
+
+#define SEW8  0
+#define SEW16 1
+#define SEW32 2
+#define SEW64 3
+
 /* float point classify helpers */
+target_ulong fclass_bh(uint64_t frs1);
 target_ulong fclass_h(uint64_t frs1);
 target_ulong fclass_s(uint64_t frs1);
 target_ulong fclass_d(uint64_t frs1);
@@ -142,6 +154,21 @@ static inline float16 check_nanbox_h(CPURISCVState *env, uint64_t f)
     }
 }
 
+static inline bfloat16 check_nanbox_bh(CPURISCVState *env, uint64_t f)
+{
+    /* Disable nanbox check when enable zfinx */
+    if (RISCV_CPU(env_cpu(env))->cfg.ext_zfinx) {
+        return (uint16_t)f;
+    }
+    uint64_t mask = MAKE_64BIT_MASK(16, 48);
+
+    if (likely((f & mask) == mask)) {
+        return (uint16_t)f;
+    } else {
+        return 0x7fc0u; /* default qnan */
+    }
+}
+
 /* Our implementation of CPUClass::has_work */
 bool riscv_cpu_has_work(CPUState *cs);
 
@@ -198,5 +225,4 @@ static inline target_ulong adjust_addr_virt(CPURISCVState *env,
 {
     return adjust_addr_body(env, addr, true);
 }
-
 #endif

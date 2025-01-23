@@ -176,6 +176,7 @@ struct RISCVCPUConfig {
     bool ext_xtheadmemidx;
     bool ext_xtheadmempair;
     bool ext_xtheadsync;
+    bool ext_xtheadvector;
     bool ext_XVentanaCondOps;
 
     uint32_t pmu_mask;
@@ -232,6 +233,7 @@ MATERIALISE_EXT_PREDICATE(xtheadmac)
 MATERIALISE_EXT_PREDICATE(xtheadmemidx)
 MATERIALISE_EXT_PREDICATE(xtheadmempair)
 MATERIALISE_EXT_PREDICATE(xtheadsync)
+MATERIALISE_EXT_PREDICATE(xtheadvector)
 MATERIALISE_EXT_PREDICATE(XVentanaCondOps)
 
 #endif

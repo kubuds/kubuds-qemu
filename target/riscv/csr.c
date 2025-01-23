@@ -76,7 +76,7 @@ RISCVException smstateen_acc_ok(CPURISCVState *env, int index, uint64_t bit)
 }
 #endif
 
-static RISCVException fs(CPURISCVState *env, int csrno)
+RISCVException fs(CPURISCVState *env, int csrno)
 {
 #if !defined(CONFIG_USER_ONLY)
     if (!env->debugger && !riscv_cpu_fp_enabled(env) &&
@@ -91,7 +91,7 @@ static RISCVException fs(CPURISCVState *env, int csrno)
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException vs(CPURISCVState *env, int csrno)
+RISCVException vs(CPURISCVState *env, int csrno)
 {
     if (riscv_cpu_cfg(env)->ext_zve32x) {
 #if !defined(CONFIG_USER_ONLY)
@@ -246,6 +246,11 @@ static RISCVException sscofpmf(CPURISCVState *env, int csrno)
     return RISCV_EXCP_NONE;
 }
 
+RISCVException any(CPURISCVState *env, int csrno)
+{
+    return RISCV_EXCP_NONE;
+}
+
 static RISCVException sscofpmf_32(CPURISCVState *env, int csrno)
 {
     if (riscv_cpu_mxl(env) != MXL_RV32) {
@@ -271,11 +276,6 @@ static RISCVException smcntrpmf_32(CPURISCVState *env, int csrno)
     }
 
     return smcntrpmf(env, csrno);
-}
-
-static RISCVException any(CPURISCVState *env, int csrno)
-{
-    return RISCV_EXCP_NONE;
 }
 
 static RISCVException any32(CPURISCVState *env, int csrno)
@@ -324,7 +324,7 @@ static RISCVException csrind_or_aia_any(CPURISCVState *env, int csrno)
     return any(env, csrno);
 }
 
-static RISCVException smode(CPURISCVState *env, int csrno)
+RISCVException smode(CPURISCVState *env, int csrno)
 {
     if (riscv_has_ext(env, RVS)) {
         return RISCV_EXCP_NONE;
@@ -837,7 +837,7 @@ static RISCVException write_frm(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_fcsr(CPURISCVState *env, int csrno,
+RISCVException read_fcsr(CPURISCVState *env, int csrno,
                                 target_ulong *val)
 {
     *val = (riscv_cpu_get_fflags(env) << FSR_AEXC_SHIFT)
@@ -845,7 +845,7 @@ static RISCVException read_fcsr(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException write_fcsr(CPURISCVState *env, int csrno,
+RISCVException write_fcsr(CPURISCVState *env, int csrno,
                                  target_ulong val)
 {
 #if !defined(CONFIG_USER_ONLY)
@@ -858,7 +858,7 @@ static RISCVException write_fcsr(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vtype(CPURISCVState *env, int csrno,
+RISCVException read_vtype(CPURISCVState *env, int csrno,
                                  target_ulong *val)
 {
     uint64_t vill;
@@ -876,28 +876,28 @@ static RISCVException read_vtype(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vl(CPURISCVState *env, int csrno,
+RISCVException read_vl(CPURISCVState *env, int csrno,
                               target_ulong *val)
 {
     *val = env->vl;
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vlenb(CPURISCVState *env, int csrno,
+RISCVException read_vlenb(CPURISCVState *env, int csrno,
                                  target_ulong *val)
 {
     *val = riscv_cpu_cfg(env)->vlenb;
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vxrm(CPURISCVState *env, int csrno,
+RISCVException read_vxrm(CPURISCVState *env, int csrno,
                                 target_ulong *val)
 {
     *val = env->vxrm;
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException write_vxrm(CPURISCVState *env, int csrno,
+RISCVException write_vxrm(CPURISCVState *env, int csrno,
                                  target_ulong val)
 {
 #if !defined(CONFIG_USER_ONLY)
@@ -907,14 +907,14 @@ static RISCVException write_vxrm(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vxsat(CPURISCVState *env, int csrno,
+RISCVException read_vxsat(CPURISCVState *env, int csrno,
                                  target_ulong *val)
 {
     *val = env->vxsat & BIT(0);
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException write_vxsat(CPURISCVState *env, int csrno,
+RISCVException write_vxsat(CPURISCVState *env, int csrno,
                                   target_ulong val)
 {
 #if !defined(CONFIG_USER_ONLY)
@@ -924,14 +924,14 @@ static RISCVException write_vxsat(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vstart(CPURISCVState *env, int csrno,
+RISCVException read_vstart(CPURISCVState *env, int csrno,
                                   target_ulong *val)
 {
     *val = env->vstart;
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException write_vstart(CPURISCVState *env, int csrno,
+RISCVException write_vstart(CPURISCVState *env, int csrno,
                                    target_ulong val)
 {
 #if !defined(CONFIG_USER_ONLY)
@@ -945,14 +945,14 @@ static RISCVException write_vstart(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_vcsr(CPURISCVState *env, int csrno,
+RISCVException read_vcsr(CPURISCVState *env, int csrno,
                                 target_ulong *val)
 {
     *val = (env->vxrm << VCSR_VXRM_SHIFT) | (env->vxsat << VCSR_VXSAT_SHIFT);
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException write_vcsr(CPURISCVState *env, int csrno,
+RISCVException write_vcsr(CPURISCVState *env, int csrno,
                                  target_ulong val)
 {
 #if !defined(CONFIG_USER_ONLY)
@@ -1853,7 +1853,7 @@ static uint64_t add_status_sd(RISCVMXL xl, uint64_t status)
     return status;
 }
 
-static RISCVException read_mstatus(CPURISCVState *env, int csrno,
+RISCVException read_mstatus(CPURISCVState *env, int csrno,
                                    target_ulong *val)
 {
     *val = add_status_sd(riscv_cpu_mxl(env), env->mstatus);
@@ -1918,7 +1918,7 @@ static target_ulong legalize_mpp(CPURISCVState *env, target_ulong old_mpp,
     return val;
 }
 
-static RISCVException write_mstatus(CPURISCVState *env, int csrno,
+RISCVException write_mstatus(CPURISCVState *env, int csrno,
                                     target_ulong val)
 {
     uint64_t mstatus = env->mstatus;
@@ -3652,7 +3652,7 @@ static RISCVException read_sstatus_i128(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException read_sstatus(CPURISCVState *env, int csrno,
+RISCVException read_sstatus(CPURISCVState *env, int csrno,
                                    target_ulong *val)
 {
     target_ulong mask = (sstatus_v1_10_mask);
@@ -3671,7 +3671,7 @@ static RISCVException read_sstatus(CPURISCVState *env, int csrno,
     return RISCV_EXCP_NONE;
 }
 
-static RISCVException write_sstatus(CPURISCVState *env, int csrno,
+RISCVException write_sstatus(CPURISCVState *env, int csrno,
                                     target_ulong val)
 {
     target_ulong mask = (sstatus_v1_10_mask);
