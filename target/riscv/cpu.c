@@ -588,6 +588,10 @@ static void rv64_thead_c906m_cpu_init(Object *obj)
     th_register_custom_csrs(cpu);
 #endif
 
+#ifndef CONFIG_USER_ONLY
+    set_satp_mode_max_supported(cpu, VM_1_10_MBARE);
+#endif
+
     /* inherited from parent obj via riscv_cpu_init() */
     cpu->cfg.pmp = true;
 }

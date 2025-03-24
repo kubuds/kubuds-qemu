@@ -29,6 +29,7 @@
 
 #include "qemu/osdep.h"
 #include "qemu/cutils.h"
+#include "qemu/units.h"
 #include "qemu/error-report.h"
 #include "qapi/error.h"
 #include "hw/boards.h"
@@ -107,6 +108,19 @@ static void milkv_duo_machine_init(MachineState *machine)
     uint64_t kernel_entry;
 
     RISCVBootInfo boot_info;
+    switch (s->machine_type) {
+    case 0:
+        mc->default_ram_size = 128 * MiB;
+        break;
+    case 1:
+        mc->default_ram_size = 256 * MiB;
+        break;
+    case 2:
+        mc->default_ram_size = 512 * MiB;
+        break;
+    default:
+        break;
+    }
 
     if (machine->ram_size != mc->default_ram_size) {
         char *sz = size_to_str(mc->default_ram_size);
@@ -117,10 +131,15 @@ static void milkv_duo_machine_init(MachineState *machine)
 
     /* Initialize SoC */
     object_initialize_child(OBJECT(machine), "soc", &s->soc, TYPE_RISCV_DUO_SOC);
-    object_property_set_str(OBJECT(&s->soc), "cpu-type", machine->cpu_type,
-                             &error_abort);
     object_property_set_bool(OBJECT(&s->soc), "little", s->little,
-                             &error_abort);
+                            &error_abort);
+    if (s->little) {
+        object_property_set_str(OBJECT(&s->soc), "cpu-type", TYPE_RISCV_CPU_THEAD_C906M,
+                                &error_abort);
+    } else {
+        object_property_set_str(OBJECT(&s->soc), "cpu-type", machine->cpu_type,
+                                &error_abort);
+    }
     object_property_set_uint(OBJECT(&s->soc), "machine-type", s->machine_type,
                              &error_abort);
     qdev_realize(DEVICE(&s->soc), NULL, &error_fatal);
@@ -320,10 +339,9 @@ static void milkv_duo_soc_realize(DeviceState *dev, Error **errp)
     }
     sysbus_mmio_map(SYS_BUS_DEVICE(&s->gpio), 0, memmap[MILKV_DUO_DEV_GPIO0].base);
 
-
     qdev_pass_gpios(DEVICE(&s->gpio), dev, NULL);
     sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 0,
-                       qdev_get_gpio_in(DEVICE(s->plic),
+                    qdev_get_gpio_in(DEVICE(s->plic),
                                         IRQ(GPIO0_IRQ)));
 
     /*SPI*/

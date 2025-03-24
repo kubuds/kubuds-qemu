@@ -987,6 +987,9 @@ typedef enum RISCVException {
 
 #define CSR_FXCR            0x800
 
+#define CSR_MHCR            0x7c1
+#define CSR_MCOR            0x7c2
+
 /* Floating point round mode in fxcr */
 #define FXCR_RD_SHIFT       24
 #define FXCR_RD             (0x7 << FXCR_RD_SHIFT)

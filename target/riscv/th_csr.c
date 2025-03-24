@@ -203,6 +203,15 @@ static int write_fxcr(CPURISCVState *env, int csrno, target_ulong val)
     return RISCV_EXCP_NONE;
 }
 
+static RISCVException read_ignore(CPURISCVState *env, int csrno, target_ulong *val)
+{
+    return RISCV_EXCP_NONE;
+}
+
+static int write_ignore(CPURISCVState *env, int csrno, target_ulong val)
+{
+    return RISCV_EXCP_NONE;
+}
 #endif
 
 static riscv_csr th_csr_list[] = {
@@ -250,6 +259,16 @@ static riscv_csr th_csr_list[] = {
         .csrno = CSR_FXCR,
         .insertion_test = test_thead_mvendorid,
         .csr_ops = { "fxcr", fs, read_fxcr,    write_fxcr }
+    },
+    {
+        .csrno = CSR_MHCR,
+        .insertion_test = test_thead_mvendorid,
+        .csr_ops = { "mhcr", any, read_ignore,    write_ignore }
+    },
+    {
+        .csrno = CSR_MCOR,
+        .insertion_test = test_thead_mvendorid,
+        .csr_ops = { "mcor", any, read_ignore,    write_ignore }
     },
 #if !defined(CONFIG_USER_ONLY)
     {
