@@ -25,3 +25,6 @@ config ZAURUS_SCOOP
 
 config SG200X_GPIO
     bool
+
+config GPIO_BACKEND
+    bool

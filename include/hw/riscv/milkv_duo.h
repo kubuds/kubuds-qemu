@@ -25,6 +25,7 @@
 #include "hw/timer/sg200x_timer.h"
 #include "hw/ssi/sg200x_spi.h"
 #include "hw/gpio/sg200x_gpio.h"
+#include "hw/gpio/gpio_backend.h"
 
 #define TYPE_RISCV_DUO_SOC "riscv.milkv.duo.soc"
 #define RISCV_DUO_SOC(obj) \
@@ -41,6 +42,7 @@ typedef struct MilkvDuoSoCState
 
     SG200XSPIState spi1;
     SG200XGPIOState gpio;
+    GPIOBACKENDState gpio_back;
 
     SG200XTimerState timer;
 

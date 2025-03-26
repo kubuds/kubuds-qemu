@@ -45,6 +45,7 @@ config MILKV_DUO
     select SG200X_SPI
     select SG200X_TIMER
     select DUO_UART
+    select GPIO_BACKEND
     select UNIMP
 
 config OPENTITAN

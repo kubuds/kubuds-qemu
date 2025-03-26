@@ -164,7 +164,6 @@ static void milkv_duo_machine_init(MachineState *machine)
         kernel_entry = 0;
     }
 
-
     kernel_entry_hi32 = (uint64_t)kernel_entry >> 32;
 
     /* reset vector */
@@ -272,6 +271,7 @@ static void milkv_duo_soc_instance_init(Object *obj)
 
     // Initialize peripherals
     object_initialize_child(obj, "gpio", &s->gpio, TYPE_SG200X_GPIO);
+    object_initialize_child(obj, "gpio-backend", &s->gpio_back, TYPE_GPIOBACKEND);
     object_initialize_child(obj, "spi1", &s->spi1, TYPE_SG200X_SPI);
 }
 
@@ -343,6 +343,19 @@ static void milkv_duo_soc_realize(DeviceState *dev, Error **errp)
     sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), 0,
                     qdev_get_gpio_in(DEVICE(s->plic),
                                         IRQ(GPIO0_IRQ)));
+
+    /*GPIO BACKEND*/
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->gpio_back), errp)) {
+        return;
+    }
+
+    qdev_pass_gpios(DEVICE(&s->gpio_back), dev, NULL);
+    for (int i = 0; i < 32; i++) {
+        qdev_connect_gpio_out_named(DEVICE(&s->gpio_back), "out", i,
+                        qdev_get_gpio_in_named(DEVICE(&s->gpio),"in", i));
+        qdev_connect_gpio_out_named(DEVICE(&s->gpio), "out", i,
+                        qdev_get_gpio_in_named(DEVICE(&s->gpio_back),"in", i));
+    }
 
     /*SPI*/
     sysbus_realize(SYS_BUS_DEVICE(&s->spi1), errp);

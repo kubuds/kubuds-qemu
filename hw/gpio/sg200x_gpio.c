@@ -215,8 +215,8 @@ static void sg200x_gpio_realize(DeviceState *dev, Error **errp)
 
     sysbus_init_irq(SYS_BUS_DEVICE(dev), &s->irq);
 
-    qdev_init_gpio_in(DEVICE(s), sg200x_gpio_set, s->ngpio);
-    qdev_init_gpio_out(DEVICE(s), s->output, s->ngpio);
+    qdev_init_gpio_in_named(DEVICE(s), sg200x_gpio_set, "in", s->ngpio);
+    qdev_init_gpio_out_named(DEVICE(s), s->output, "out", s->ngpio);
 }
 
 static void sifive_gpio_reset(DeviceState *dev)
