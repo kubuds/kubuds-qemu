@@ -172,8 +172,13 @@ static void sg200x_gpio_set(void *opaque, int line, int value)
 
     assert(line >= 0 && line < SG200X_GPIO_PINS);
 
-    if (value >= 0)
-    {
+    bool output_en  = extract32(s->ddr, line, 1);
+
+    if (output_en) {
+        return;
+    }
+
+    if (value >= 0) {
         s->in = deposit32(s->in, line, 1, value != 0);
     }
 
