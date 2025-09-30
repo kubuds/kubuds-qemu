@@ -136,6 +136,10 @@ typedef abi_int         target_pid_t;
 #define STACK_ALIGNMENT 16
 #endif
 
+#ifndef ABI_N32_P
+#define ABI_N32_P(e_flags) ((e_flags & EF_RISCV_N32) != 0)
+#endif
+
 #ifdef TARGET_ABI32 || defined(TARGET_RISCV64ILP32)
 #undef ELF_CLASS
 #define ELF_CLASS ELFCLASS32

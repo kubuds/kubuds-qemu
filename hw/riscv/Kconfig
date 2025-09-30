@@ -12,7 +12,7 @@ config IBEX
 config MICROCHIP_PFSOC
     bool
     default y
-    depends on RISCV64
+    depends on RISCV64 || RISCV64ILP32
     select CADENCE_SDHCI
     select CPU_CLUSTER
     select DEVICE_TREE
@@ -44,7 +44,7 @@ config OPENTITAN
 config RISCV_VIRT
     bool
     default y
-    depends on RISCV32 || RISCV64
+    depends on RISCV32 || RISCV64 || RISCV64ILP32
     imply PCI_DEVICES
     imply VIRTIO_VGA
     imply TEST_DEVICES
@@ -72,7 +72,7 @@ config RISCV_VIRT
 config SHAKTI_C
     bool
     default y
-    depends on RISCV64
+    depends on RISCV64 || RISCV64ILP32
     select RISCV_ACLINT
     select SHAKTI_UART
     select SIFIVE_PLIC
@@ -81,7 +81,7 @@ config SHAKTI_C
 config SIFIVE_E
     bool
     default y
-    depends on RISCV32 || RISCV64
+    depends on RISCV32 || RISCV64 || RISCV64ILP32
     select RISCV_ACLINT
     select SIFIVE_GPIO
     select SIFIVE_PLIC
@@ -93,7 +93,7 @@ config SIFIVE_E
 config SIFIVE_U
     bool
     default y
-    depends on RISCV32 || RISCV64
+    depends on RISCV32 || RISCV64 || RISCV64ILP32
     select CADENCE
     select CPU_CLUSTER
     select DEVICE_TREE
@@ -113,7 +113,7 @@ config SIFIVE_U
 config SPIKE
     bool
     default y
-    depends on RISCV32 || RISCV64
+    depends on RISCV32 || RISCV64 || RISCV64ILP32
     select DEVICE_TREE
     select RISCV_NUMA
     select HTIF
@@ -123,7 +123,7 @@ config SPIKE
 config XIANGSHAN_KUNMINGHU
     bool
     default y
-    depends on RISCV64
+    depends on RISCV64 || RISCV64ILP32
     select RISCV_ACLINT
     select RISCV_APLIC
     select RISCV_IMSIC

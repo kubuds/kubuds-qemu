@@ -110,7 +110,7 @@ static bool trans_amocas_q(DisasContext *ctx, arg_amocas_q *a)
         return false;
     }
 
-#ifdef TARGET_RISCV64
+#if  defined(TARGET_RISCV64) || defined(TARGET_RISCV64ILP32)
     TCGv_i128 dest = tcg_temp_new_i128();
     TCGv src1 = get_address(ctx, a->rs1, 0);
     TCGv_i128 src2 = tcg_temp_new_i128();

@@ -230,10 +230,6 @@ uint32_t riscv_pm_get_pmlen(RISCVPmPmm pmm)
     default:
         g_assert_not_reached();
     }
-
-#ifdef TARGET_RISCV64ILP32
-    env->cur_pmmask = 0xffffffff00000000ULL;
-#endif
 }
 
 #ifndef CONFIG_USER_ONLY

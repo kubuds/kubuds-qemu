@@ -658,11 +658,16 @@ static vaddr riscv_cpu_get_pc(CPUState *cs)
     RISCVCPU *cpu = RISCV_CPU(cs);
     CPURISCVState *env = &cpu->env;
 
+#ifdef TARGET_RISCV64ILP32
+    return env->pc & UINT32_MAX;
+#else
     /* Match cpu_get_tb_cpu_state. */
     if (env->xl == MXL_RV32) {
         return env->pc & UINT32_MAX;
     }
+
     return env->pc;
+#endif
 }
 
 #ifndef CONFIG_USER_ONLY
@@ -1179,7 +1184,7 @@ static void riscv_cpu_validate_misa_mxl(RISCVCPUClass *mcc)
 
     /* Validate that MISA_MXL is set properly. */
     switch (mcc->def->misa_mxl_max) {
-#ifdef TARGET_RISCV64
+#if defined(TARGET_RISCV64) || defined(TARGET_RISCV64ILP32)
     case MXL_RV64:
     case MXL_RV128:
         cc->gdb_core_xml_file = "riscv-64bit-cpu.xml";
@@ -3045,7 +3050,7 @@ static const TypeInfo riscv_cpu_type_infos[] = {
     ),
 #endif
 
-#if defined(TARGET_RISCV64)
+#if defined(TARGET_RISCV64) || defined(TARGET_RISCV64ILP32)
     DEFINE_RISCV_CPU(TYPE_RISCV_CPU_BASE64, TYPE_RISCV_DYNAMIC_CPU,
         .cfg.max_satp_mode = VM_1_10_SV57,
         .misa_mxl_max = MXL_RV64,

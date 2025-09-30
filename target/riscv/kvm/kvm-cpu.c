@@ -64,7 +64,7 @@ static bool cap_has_mp_state;
 #define KVM_RISCV_REG_ID_U64(type, idx) (KVM_REG_RISCV | KVM_REG_SIZE_U64 | \
                                          type | idx)
 
-#if defined(TARGET_RISCV64)
+#if defined(TARGET_RISCV64) || defined(TARGET_RISCV64ILP32)
 #define KVM_RISCV_REG_ID_ULONG(type, idx) KVM_RISCV_REG_ID_U64(type, idx)
 #else
 #define KVM_RISCV_REG_ID_ULONG(type, idx) KVM_RISCV_REG_ID_U32(type, idx)
@@ -2116,7 +2116,7 @@ static const TypeInfo riscv_kvm_cpu_type_infos[] = {
             .vext_spec = RISCV_PROFILE_ATTR_UNUSED,
             .cfg.max_satp_mode = -1,
         },
-#elif defined(TARGET_RISCV64)
+#elif defined(TARGET_RISCV64) || defined(TARGET_RISCV64ILP32)
         .class_data = &(const RISCVCPUDef) {
             .misa_mxl_max = MXL_RV64,
             .priv_spec = RISCV_PROFILE_ATTR_UNUSED,
