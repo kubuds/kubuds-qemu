@@ -140,7 +140,7 @@ typedef abi_int         target_pid_t;
 #define ABI_N32_P(e_flags) ((e_flags & EF_RISCV_N32) != 0)
 #endif
 
-#ifdef TARGET_ABI32 || defined(TARGET_RISCV64ILP32)
+#if  defined(TARGET_ABI32) || defined(TARGET_RISCV64ILP32)
 #undef ELF_CLASS
 #define ELF_CLASS ELFCLASS32
 #endif
